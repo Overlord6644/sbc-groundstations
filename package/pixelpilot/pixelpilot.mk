@@ -4,8 +4,12 @@
 #
 ###############################################################################
 
-PIXELPILOT_VERSION=47e21fb43fe68c9fe43771d630d6c36d06755120
-PIXELPILOT_SITE=https://github.com/OpenIPC/PixelPilot_rk.git
+# Temporarily pinned to the fork carrying the per-button bias/active_low,
+# action and long_action GPIO support that the Eachine Sphere Link profile
+# needs. Backward compatible, so the other boards build and behave identically.
+# Revert to OpenIPC/PixelPilot_rk once that change is merged upstream.
+PIXELPILOT_VERSION=c991e06dd46bbc22f85ecc30fe294a5083baace8
+PIXELPILOT_SITE=https://github.com/Overlord6644/PixelPilot_rk.git
 PIXELPILOT_SITE_METHOD = git
 PIXELPILOT_GIT_SUBMODULES = YES
 PIXELPILOT_INSTALL_STAGING = NO
