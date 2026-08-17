@@ -1,0 +1,27 @@
+gsmenu:
+  enabled: true
+  # Eachine Sphere Link VRX button map. Same RK3566 base as the RunCam
+  # WiFiLink, but the buttons are wired to different lines and polarities, so
+  # the standard six-key layout does not fit:
+  #   - the 5-way RIGHT is on PIN40 (gpiochip3 line 5), active-low and with no
+  #     external pull, so it needs bias:pull-up + active_low:true;
+  #   - the dedicated AP button (PIN38) toggles the WiFi hotspot instead of
+  #     doubling as Enter;
+  #   - there is a dedicated REC button, so long-press-left must NOT toggle
+  #     recording (long_action: "").
+  # These extra keys require the input.cpp support in PixelPilot_rk.
+  gpio:
+    up: 16
+    down: 18
+    center: 11
+    rec: 32
+    left:  { chip: gpiochip3, pin: 2, long_action: "" }
+    right: { chip: gpiochip3, pin: 5, bias: pull-up, active_low: true }
+    ap:    { chip: gpiochip3, pin: 6, action: "sh -c '[ -e /etc/wpa_supplicant.hotspot.conf ] && gsmenu.sh set gs wifi hotspot off || gsmenu.sh set gs wifi hotspot on'" }
+
+  actions:
+    ground:
+      - label: Toggle gadget mode
+        action: /usr/sbin/gadget
+      - label: Generate support package
+        action: /usr/bin/collect_support_data.sh
