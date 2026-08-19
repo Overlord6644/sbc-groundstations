@@ -1,0 +1,10 @@
+# U-Boot's extlinux/syslinux parser and fw_setenv do NOT tolerate CRLF: a
+# trailing \r ends up glued to the DTB path / kernel cmdline / env value and
+# the board fails to boot (hangs right after the splash). These were committed
+# with CRLF once and cost a long debugging session - force LF forever.
+**/boot/extlinux/extlinux.conf text eol=lf
+**/boot/*.env text eol=lf
+# Target shell scripts and init scripts must be LF too (a \r in the shebang or
+# a line makes /bin/sh choke).
+**/overlay/**/*.sh text eol=lf
+**/overlay/**/etc/init.d/* text eol=lf
