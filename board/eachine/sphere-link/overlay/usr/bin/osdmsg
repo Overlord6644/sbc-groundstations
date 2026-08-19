@@ -1,0 +1,4 @@
+#!/bin/sh
+# Show a transient message on PixelPilot's HDMI OSD (custom-message FIFO).
+# Bounded by timeout so it never blocks if PixelPilot isn't reading.
+timeout 1 sh -c "printf '%s\n' \"$*\" > /run/pixelpilot.msg" 2>/dev/null

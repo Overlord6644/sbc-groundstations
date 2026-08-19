@@ -14,7 +14,11 @@ gsmenu:
     up: 16
     down: 18
     center: 11
-    rec: 32
+    # REC is an action, not the built-in DVR toggle: in gadget mode the DVR
+    # partition is exported as USB mass-storage (recording on the VRX would
+    # corrupt it), so recording is done PC-side; the script no-ops with a
+    # message in gadget mode and toggles the local DVR (SIGUSR1) on HDMI.
+    rec:   { chip: gpiochip3, pin: 18, action: "/usr/bin/rec-toggle.sh" }
     left:  { chip: gpiochip3, pin: 2, long_action: "" }
     # RIGHT is on gpiochip3/5 and reads active-HIGH (0 idle -> 1 pressed),
     # like up/down/center - NOT active-low. The earlier bias:pull-up +
@@ -29,3 +33,10 @@ gsmenu:
         action: /usr/sbin/gadget
       - label: Generate support package
         action: /usr/bin/collect_support_data.sh
+
+# In gadget mode PixelPilot keeps running on HDMI and restreams the raw
+# RTP to the PC (pcpilot) over the USB link, so both the VRX screen and the
+# PC get video. Harmless "no client" when no PC is attached.
+restream:
+  enabled: true
+  manual_ip: 192.168.5.100
