@@ -29,7 +29,15 @@ start() {
 		echo "gadget-auto: gadget already up"
 		return 0
 	fi
-	echo "gadget-auto: no HDMI -> enabling USB gadget"
+	# wait for the USB device controller to be ready - at boot this init may
+	# run before the UDC driver has probed, and binding the gadget to an
+	# absent UDC fails silently (this is why the gadget did not come up on a
+	# headless reboot)
+	for i in 1 2 3 4 5 6 7 8 9 10; do
+		[ -n "$(ls /sys/class/udc 2>/dev/null)" ] && break
+		sleep 1
+	done
+	echo "gadget-auto: no HDMI -> enabling USB gadget (udc: $(ls /sys/class/udc 2>/dev/null))"
 	/usr/sbin/gadget
 }
 
