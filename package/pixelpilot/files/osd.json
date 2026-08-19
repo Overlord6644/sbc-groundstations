@@ -320,12 +320,13 @@
             "type": "SignalWarningWidget",
             "x": 0,
             "y": 0,
-            "rate": true,
-            "rate_divisor": 125000,
             "average_ms": 1000,
-            "threshold": 8,
-            "critical": 2,
-            "facts": [ { "name": "gstreamer.received_bytes" } ]
+            "threshold": 45,
+            "critical": 22,
+            "facts": [
+                { "name": "os_mon.wifi.rssi", "tags": {"adapter": "0", "type": "rssi_a"} },
+                { "name": "os_mon.wifi.rssi", "tags": {"adapter": "0", "type": "rssi_b"} }
+            ]
         },
         {
             "name": "MspDisplayPort",
