@@ -19,7 +19,7 @@ gsmenu:
     # corrupt it), so recording is done PC-side; the script no-ops with a
     # message in gadget mode and toggles the local DVR (SIGUSR1) on HDMI.
     rec:   { chip: gpiochip3, pin: 18, action: "/usr/bin/rec-toggle.sh" }
-    left:  { chip: gpiochip3, pin: 2, long_action: "" }
+    left:  { chip: gpiochip3, pin: 2, long_action: "/usr/sbin/gadget" }
     # RIGHT is on gpiochip3/5 and reads active-HIGH (0 idle -> 1 pressed),
     # like up/down/center - NOT active-low. The earlier bias:pull-up +
     # active_low made the stable-0 line read as a permanent press (phantom

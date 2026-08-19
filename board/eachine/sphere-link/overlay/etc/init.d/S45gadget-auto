@@ -1,0 +1,49 @@
+#!/bin/sh
+# Auto-enable the USB gadget at boot when NO HDMI display is connected, so the
+# VRX works as a PC dongle (NCM + mass-storage + ACM) headless.
+#
+# The gadget toggle otherwise lives only in the gsmenu (needs HDMI) and the
+# left long-press - both handled by PixelPilot - so with no screen there was no
+# way to turn the gadget on. Here the system decides for itself: a screen ->
+# normal HDMI boot; no screen -> come up as a PC dongle. The gadget stays
+# togglable from the menu / left long-press when a screen is attached.
+#
+# Idempotent: only creates the gadget when it is not already up, so running it
+# by hand (or twice) never tears an existing gadget down.
+
+HDMI=/sys/class/drm/card0-HDMI-A-1/status
+
+start() {
+	st=""
+	# the DRM connector may not have reported yet this early in boot
+	for i in 1 2 3 4 5; do
+		st=$(cat "$HDMI" 2>/dev/null)
+		[ -n "$st" ] && break
+		sleep 1
+	done
+	if [ "$st" = "connected" ]; then
+		echo "gadget-auto: HDMI connected -> normal boot"
+		return 0
+	fi
+	if [ -d /sys/kernel/config/usb_gadget/g1 ]; then
+		echo "gadget-auto: gadget already up"
+		return 0
+	fi
+	# wait for the USB device controller to be ready - at boot this init may
+	# run before the UDC driver has probed, and binding the gadget to an
+	# absent UDC fails silently (this is why the gadget did not come up on a
+	# headless reboot)
+	for i in 1 2 3 4 5 6 7 8 9 10; do
+		[ -n "$(ls /sys/class/udc 2>/dev/null)" ] && break
+		sleep 1
+	done
+	echo "gadget-auto: no HDMI -> enabling USB gadget (udc: $(ls /sys/class/udc 2>/dev/null))"
+	/usr/sbin/gadget
+}
+
+case "$1" in
+	start)   start ;;
+	stop)    ;;
+	restart) start ;;
+	*)       echo "usage: $0 {start|stop|restart}"; exit 1 ;;
+esac
