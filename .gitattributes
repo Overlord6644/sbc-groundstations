@@ -8,3 +8,8 @@
 # a line makes /bin/sh choke).
 **/overlay/**/*.sh text eol=lf
 **/overlay/**/etc/init.d/* text eol=lf
+# Same for scripts without an extension and for daemon configs read by
+# busybox (udhcpd keeps a trailing \r as part of the value).
+**/overlay/**/usr/bin/* text eol=lf
+**/overlay/**/usr/sbin/* text eol=lf
+**/overlay/**/etc/*.conf text eol=lf

@@ -1,0 +1,22 @@
+#!/bin/sh
+# Gadget-mode camera proxy. The PC behind the USB gadget cannot reach the
+# camera: this image has no iptables, so the VRX does not NAT 192.168.5.0/24
+# into the camera's AP, and the camera has no route back to the PC. pcpilot
+# talks to the camera through here instead, on the gadget address:
+#
+#   192.168.5.1:8081  -> camera :80     HTTP API (/api/v1, /request/idr);
+#                                        :80 on the VRX is the DVR web UI
+#   192.168.5.1:12355 -> camera :12355  command daemon (channel, video mode)
+#   192.168.5.1:11223 -> camera :11223  UDP IDR tokens, ACKs relayed back
+#
+# Started by /usr/sbin/gadget on link up, stopped on teardown.
+GS=192.168.5.1
+CAM=192.168.0.1
+
+pkill -f "bind=$GS" 2>/dev/null
+
+socat TCP-LISTEN:8081,bind=$GS,reuseaddr,fork TCP:$CAM:80 &
+socat TCP-LISTEN:12355,bind=$GS,reuseaddr,fork TCP:$CAM:12355 &
+# one child per PC socket; -T reaps a child once its peer goes quiet
+socat -T 60 UDP-LISTEN:11223,bind=$GS,reuseaddr,fork UDP:$CAM:11223 &
+wait
