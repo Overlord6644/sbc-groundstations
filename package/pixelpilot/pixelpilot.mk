@@ -6,9 +6,11 @@
 
 # Temporarily pinned to the fork carrying the per-button bias/active_low,
 # action and long_action GPIO support that the Eachine Sphere Link profile
-# needs. Backward compatible, so the other boards build and behave identically.
+# needs, the VRX glow / GADGET ON OSD and restream auto-start for gadget mode,
+# and upstream #151 (fragmented-MP4 DVR). Backward compatible, so the other
+# boards build and behave identically.
 # Revert to OpenIPC/PixelPilot_rk once that change is merged upstream.
-PIXELPILOT_VERSION=52d792e68d433efb4f449d3fb236d4287a300564
+PIXELPILOT_VERSION=29567077e8ca666b7ef9f2d55ca379255e83c543
 PIXELPILOT_SITE=https://github.com/Overlord6644/PixelPilot_rk.git
 PIXELPILOT_SITE_METHOD = git
 PIXELPILOT_GIT_SUBMODULES = YES
