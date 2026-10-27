@@ -4,7 +4,7 @@
 #
 ###############################################################################
 
-MSPOSD_VERSION = 9bca2c37b5fb9eb13eac1bac1e2b7192b6fa95d5
+MSPOSD_VERSION = fd5f93b0df410e5bda0ee8b94510ea8ae9f4cde4
 # Fork: the moving map on a goggles without DisplayPort from the FC (redraw on
 # attitude, show_on_start, live msposd.ini), pixel OSD and MAVLink work. Builds for Rockchip
 # without X11 straight from the sources below, so no Makefile patch.

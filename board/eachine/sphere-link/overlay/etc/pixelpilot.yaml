@@ -41,6 +41,10 @@ gsmenu:
         action: /usr/bin/msposd_map.sh bigger
       - label: "Map: smaller"
         action: /usr/bin/msposd_map.sh smaller
+      - label: "Map: zoom in"
+        action: /usr/bin/msposd_map.sh zoomin
+      - label: "Map: zoom out"
+        action: /usr/bin/msposd_map.sh zoomout
       - label: "Map: transparency"
         action: /usr/bin/msposd_map.sh opacity
       - label: "Map: follow mode"

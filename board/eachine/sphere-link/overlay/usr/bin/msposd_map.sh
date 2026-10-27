@@ -2,7 +2,7 @@
 # Goggles control of the moving map (ground msposd), for the menu's Actions
 # and the buttons: msposd re-reads msposd.ini when it changes. Same size and
 # transparency steps as pcpilot's map toolbar.
-#   msposd_map.sh toggle | bigger | smaller | opacity | follow
+#   msposd_map.sh toggle | bigger | smaller | zoomin | zoomout | opacity | follow
 INI=/usr/bin/msposd.ini
 
 get() { sed -n "s/^$1 *= *//p" $INI | head -1; }
@@ -38,6 +38,12 @@ case "$1" in
 		;;
 	bigger)  s=$(size_of); [ $s -lt 4 ] && s=$((s + 1)); set_size $s ;;
 	smaller) s=$(size_of); [ $s -gt 0 ] && s=$((s - 1)); set_size $s ;;
+	zoomin|zoomout)          # zoom on the craft, 10..18 (the pack's levels win)
+		z=$(get zoom); [ -n "$z" ] || z=15
+		if [ "$1" = zoomin ]; then [ $z -lt 18 ] && z=$((z + 1))
+		else [ $z -gt 10 ] && z=$((z - 1)); fi
+		put zoom $z; say "zoom $z"
+		;;
 	opacity)
 		case "$(get opacity)" in
 			80) o=60 ;; 60) o=40 ;; 40) o=100 ;; *) o=80 ;;
@@ -46,9 +52,9 @@ case "$1" in
 		;;
 	follow)
 		case "$(get follow)" in
-			plane) f=north ;; north) f=fit ;; fit) f=center ;; *) f=plane ;;
+			north) f=plane ;; plane) f=fit ;; fit) f=center ;; *) f=north ;;
 		esac
 		put follow $f; say "follow $f"
 		;;
-	*) echo "usage: $0 toggle|bigger|smaller|opacity|follow"; exit 1 ;;
+	*) echo "usage: $0 toggle|bigger|smaller|zoomin|zoomout|opacity|follow"; exit 1 ;;
 esac
