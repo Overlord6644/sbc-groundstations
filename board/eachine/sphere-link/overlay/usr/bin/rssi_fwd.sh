@@ -2,7 +2,7 @@
 # Gadget-mode RSSI forwarder. Reads the dongle's two RF-chain percentages
 # from the Realtek driver (the real air-link RSSI) and pushes them to the
 # PC HUD (:12346, "RSSI a b") and to the camera's aalink feedback
-# (:12345, "<best>,vrx"), ~2 Hz. Started by /usr/sbin/gadget on link up.
+# (:12345, "<best>,vrx[,loss=<permille>]"), ~2 Hz. Started by /usr/sbin/gadget on link up.
 #
 # The aalink feedback reports the BEST antenna (max), not the worst: a
 # diversity receiver effectively runs on its best RF chain, so reporting the
@@ -10,10 +10,25 @@
 # stuck at a low MCS / ~1200 kbps even on an excellent (-39 dBm) link.
 PC=192.168.5.100
 CAM=192.168.0.1
+GS=192.168.5.1
 IF=$(ls /sys/class/net 2>/dev/null | grep '^wlx' | head -n1)
 [ -z "$IF" ] && exit 0
 D=$(ls -d /proc/net/rtl*/"$IF" 2>/dev/null | head -n1)
 [ -z "$D" ] && exit 0
+
+# The video loss pcpilot measures on the stream we relay (it sends "<permille>"
+# to :12347 twice a second): appended to the aalink feedback as ",loss=N"
+# while fresh, so aalink backs off on real loss, not on RSSI alone. Bound to
+# the gadget address, so the gadget teardown's "bind=" sweep stops it too.
+LOSS=/tmp/pc_loss
+socat -u UDP-RECV:12347,bind=$GS,reuseaddr - 2>/dev/null |
+	while read -r v; do echo "$v" > $LOSS.new && mv $LOSS.new $LOSS; done &
+
+loss_field() {
+	[ -f $LOSS ] || return
+	[ $(( $(date +%s) - $(stat -c %Y $LOSS) )) -le 3 ] || return
+	printf ',loss=%s' "$(cat $LOSS)"
+}
 
 while true; do
 	L=$(grep 'rssi_a' "$D/trx_info_debug" 2>/dev/null | head -n1)
@@ -26,7 +41,7 @@ while true; do
 	W=$A
 	if [ "$B" -gt "$W" ] 2>/dev/null; then W=$B; fi
 	if [ "$W" -ge 0 ] 2>/dev/null; then
-		echo "$W,vrx" | socat -u - UDP-SENDTO:$CAM:12345 2>/dev/null
+		echo "$W,vrx$(loss_field)" | socat -u - UDP-SENDTO:$CAM:12345 2>/dev/null
 	fi
 	sleep 0.5
 done
