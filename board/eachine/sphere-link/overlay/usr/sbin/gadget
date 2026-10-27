@@ -3,6 +3,7 @@
 # gadget, plus board extras applied when the link comes up:
 #   - the camera proxy (cam_proxy.sh), so pcpilot's menu and IDR requests
 #     reach the camera HTTP/:12355/:11223 through the VRX;
+#   - copy pcpilot's map packs for the goggles (map_sync.sh);
 #   - start the RSSI forwarder that feeds the PC HUD (and the camera's
 #     aalink) the real per-antenna link RSSI.
 # PixelPilot keeps running and restreams the video to the PC (see
@@ -35,6 +36,7 @@ fi
 if [ -d /sys/kernel/config/usb_gadget/g1 ]; then
 	killf rssi_fwd.sh
 	killf cam_proxy.sh
+	killf map_sync.sh
 	killf "bind=192.168.5.1"
 	ifdown usb0
 	cd /sys/kernel/config/usb_gadget/g1
@@ -108,4 +110,7 @@ killf cam_proxy.sh
 setsid /usr/bin/cam_proxy.sh >/dev/null 2>&1 &
 killf rssi_fwd.sh
 setsid /usr/bin/rssi_fwd.sh >/dev/null 2>&1 &
+# map packs pcpilot fills from the web, copied for the goggles' map
+killf map_sync.sh
+setsid /usr/bin/map_sync.sh >/dev/null 2>&1 &
 echo ">>> gadget up (mass-storage + net + camera proxy + rssi relay)"
