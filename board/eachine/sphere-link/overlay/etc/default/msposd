@@ -1,0 +1,6 @@
+# Ground msposd on the Sphere Link: draws only the moving map, into
+# PixelPilot's "msposd" surface (osd.json). The FC's OSD itself is drawn on
+# the camera, so no DisplayPort comes this way - just the telemetry, relayed
+# by msp_relay on 14561. Map settings: /usr/bin/msposd.ini, packs in /root/maps.
+MSPOSD_ARGS="--osd --ahi 0 --matrix 11 -r 20 --master 127.0.0.1:14561"
+MSPOSD_ENABLED=true

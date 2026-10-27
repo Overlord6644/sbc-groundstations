@@ -4,10 +4,14 @@
 #
 ###############################################################################
 
-MSPOSD_VERSION = 27ae3a0779fe2d7148a8d775c4313c321c0f6d1d
-MSPOSD_SITE = https://github.com/OpenIPC/msposd.git
+MSPOSD_VERSION = ac1f54a07a7ab849db6c1039c98bf208c895298d
+# Fork: the moving map on a goggles without DisplayPort from the FC (redraw on
+# attitude, show_on_start), pixel OSD and MAVLink work. Builds for Rockchip
+# without X11 straight from the sources below, so no Makefile patch.
+MSPOSD_SITE = https://github.com/Overlord6644/msposd.git
 MSPOSD_SITE_METHOD = git
 MSPOSD_INSTALL_TARGET = YES
+MSPOSD_DEPENDENCIES = cairo libevent sqlite host-pkgconf
 
 define MSPOSD_INSTALL_TARGET_CMDS
 
@@ -34,9 +38,8 @@ define MSPOSD_INSTALL_TARGET_CMDS
 endef
 
 define MSPOSD_BUILD_CMDS
-
-	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D) DRV=$(@D) OUTPUT=$(@D)/msposd CC=$(TARGET_CC) br-rockchip
-
+	echo '#define GIT_VERSION "$(MSPOSD_VERSION)"' > $(@D)/version.h
+	cd $(@D) && $(TARGET_CC) $(TARGET_CFLAGS) 		$$(sed -n 's/^SRCS := //p' Makefile) $$(sed -n 's/^GS_SRCS := //p' Makefile) 		-I. -Isdk/gk7205v300/include 		$$($(PKG_CONFIG_HOST_BINARY) --cflags cairo sqlite3 libevent_core) 		-D__ROCKCHIP__ -Wno-address-of-packed-member -Wno-incompatible-pointer-types 		-DVERSION_STRING='"$(MSPOSD_VERSION)"' -O2 		$(TARGET_LDFLAGS) 		$$($(PKG_CONFIG_HOST_BINARY) --libs cairo sqlite3 libevent_core) -lm -lrt 		-o msposd
 endef
 
 $(eval $(generic-package))

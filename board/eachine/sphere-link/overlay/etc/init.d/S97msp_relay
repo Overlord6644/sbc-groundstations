@@ -1,0 +1,24 @@
+#!/bin/sh
+# FC telemetry from the camera to the map: see /usr/bin/msp_relay.py.
+# Before S98msposd, which reads the local leg.
+PIDFILE=/var/run/msp_relay.pid
+
+case "$1" in
+    start)
+        printf "Starting msp_relay: "
+        start-stop-daemon -S -b -q -m -p $PIDFILE --exec /usr/bin/python3 \
+            -- /usr/bin/msp_relay.py && echo "OK" || echo "FAIL"
+        ;;
+    stop)
+        printf "Stopping msp_relay: "
+        start-stop-daemon -K -q -p $PIDFILE && echo "OK" || echo "FAIL"
+        rm -f $PIDFILE
+        ;;
+    restart|reload)
+        "$0" stop
+        "$0" start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac

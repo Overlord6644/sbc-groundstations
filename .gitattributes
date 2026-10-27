@@ -13,3 +13,9 @@
 **/overlay/**/usr/bin/* text eol=lf
 **/overlay/**/usr/sbin/* text eol=lf
 **/overlay/**/etc/*.conf text eol=lf
+# Same for the other files the target reads as text.
+**/overlay/**/*.py text eol=lf
+**/overlay/**/*.ini text eol=lf
+**/overlay/**/etc/default/* text eol=lf
+package/**/*.mk text eol=lf
+package/**/Config.in text eol=lf

@@ -1,6 +1,11 @@
 config BR2_PACKAGE_MSPOSD
 	bool "msposd"
+	select BR2_PACKAGE_CAIRO
+	select BR2_PACKAGE_LIBEVENT
+	select BR2_PACKAGE_SQLITE
 	help
-	  OpenIPC implementation of MSP Displayport OSD for INAV/Betaflight/ArduPilot
+	  OpenIPC implementation of MSP Displayport OSD for INAV/Betaflight/ArduPilot.
+	  Built as the ground station: on the goggles it draws into PixelPilot's
+	  "msposd" surface (the moving map, from the camera's relayed MSP).
 
 	  https://github.com/OpenIPC/msposd
