@@ -8,6 +8,13 @@
 # PixelPilot keeps running and restreams the video to the PC (see
 # restream: in pixelpilot.yaml). Credits to zhouruixi for the base.
 
+# busybox here has no pkill: kill by command-line match
+killf() {
+	for p in $(ps w | grep -F -- "$1" | grep -v -e grep -e awk | awk '{print $1}'); do
+		[ "$p" != "$$" ] && kill "$p" 2>/dev/null
+	done
+}
+
 sed -i '/^ttyGS0/d' /etc/inittab
 kill -HUP 1
 if [ x$1 = "xinit" -a ! -f /tmp/gadget ] ; then
@@ -26,9 +33,9 @@ fi
 [ -d /sys/kernel/config/usb_gadget ] || modprobe libcomposite
 
 if [ -d /sys/kernel/config/usb_gadget/g1 ]; then
-	pkill -f rssi_fwd.sh 2>/dev/null
-	pkill -f cam_proxy.sh 2>/dev/null
-	pkill -f "bind=192.168.5.1" 2>/dev/null
+	killf rssi_fwd.sh
+	killf cam_proxy.sh
+	killf "bind=192.168.5.1"
 	ifdown usb0
 	cd /sys/kernel/config/usb_gadget/g1
 	echo '' > UDC
@@ -97,8 +104,8 @@ ifup usb0
 # (This used to NAT the PC into the camera LAN with iptables, but the image
 # ships no iptables: the rule failed silently and the PC's IDR requests and
 # menu never reached the camera. The proxy needs nothing from the kernel.)
-pkill -f cam_proxy.sh 2>/dev/null
+killf cam_proxy.sh
 setsid /usr/bin/cam_proxy.sh >/dev/null 2>&1 &
-pkill -f rssi_fwd.sh 2>/dev/null
+killf rssi_fwd.sh
 setsid /usr/bin/rssi_fwd.sh >/dev/null 2>&1 &
 echo ">>> gadget up (mass-storage + net + camera proxy + rssi relay)"

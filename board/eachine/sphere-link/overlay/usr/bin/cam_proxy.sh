@@ -10,10 +10,17 @@
 #   192.168.5.1:11223 -> camera :11223  UDP IDR tokens, ACKs relayed back
 #
 # Started by /usr/sbin/gadget on link up, stopped on teardown.
+# busybox here has no pkill: kill by command-line match
+killf() {
+	for p in $(ps w | grep -F -- "$1" | grep -v -e grep -e awk | awk '{print $1}'); do
+		[ "$p" != "$$" ] && kill "$p" 2>/dev/null
+	done
+}
+
 GS=192.168.5.1
 CAM=192.168.0.1
 
-pkill -f "bind=$GS" 2>/dev/null
+killf "bind=$GS"
 
 socat TCP-LISTEN:8081,bind=$GS,reuseaddr,fork TCP:$CAM:80 &
 socat TCP-LISTEN:12355,bind=$GS,reuseaddr,fork TCP:$CAM:12355 &
