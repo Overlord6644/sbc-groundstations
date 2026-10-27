@@ -4,9 +4,9 @@
 #
 ###############################################################################
 
-MSPOSD_VERSION = 190e14aa882a5588013be2a241f19fa0e98e0d96
+MSPOSD_VERSION = d5c2754f08162c5b343ec2b4c268582992a40fa4
 # Fork: the moving map on a goggles without DisplayPort from the FC (redraw on
-# attitude, show_on_start), pixel OSD and MAVLink work. Builds for Rockchip
+# attitude, show_on_start, live msposd.ini), pixel OSD and MAVLink work. Builds for Rockchip
 # without X11 straight from the sources below, so no Makefile patch.
 MSPOSD_SITE = https://github.com/Overlord6644/msposd.git
 MSPOSD_SITE_METHOD = git
