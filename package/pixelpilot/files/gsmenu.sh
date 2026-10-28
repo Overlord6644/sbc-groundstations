@@ -223,9 +223,9 @@ case "$@" in
         ;;
     "set air wfbng adaptivelink"*)
         if [ "$5" = "on" ]; then
-            $SSH 'sed -i "/alink_drone &/d" /etc/rc.local && sed -i -e "\$i alink_drone &" /etc/rc.local && cli -s .video0.qpDelta -12 && killall -1 majestic && (nohup alink_drone >/dev/null 2>&1 &)'
+            $SSH 'sed -i "/alink_drone &/d" /etc/rc.local && sed -i -e "\$i alink_drone &" /etc/rc.local && cli -s .video0.qpDelta -12 && { killall -1 majestic 2>/dev/null; true; } && (nohup alink_drone >/dev/null 2>&1 &)'
         else
-            $SSH 'killall -q -9 alink_drone;  sed -i "/alink_drone &/d" /etc/rc.local  ; cli -d .video0.qpDelta && killall -1 majestic'
+            $SSH 'killall -q -9 alink_drone;  sed -i "/alink_drone &/d" /etc/rc.local  ; cli -d .video0.qpDelta; killall -1 majestic 2>/dev/null; true'
         fi
         ;;
 
@@ -791,6 +791,13 @@ case "$@" in
         EXCLUDE_IFACE="wlan0"
         SSID="${6:-OpenIPC}"
         PASSWORD="${7:-12345678}"
+        # a dual-link camera (wyvern-ai-osd firmware/dual) switches with us:
+        # told first, while it is still reachable at its current address
+        [ -x /usr/bin/cam_linkmode.sh ] && /usr/bin/cam_linkmode.sh "$5"
+        # the APFPV client config as it was, kept on the way to WFB and put
+        # back on the way out - not regenerated from defaults (unless the
+        # menu passes an SSID)
+        SAVED=/etc/apfpv-saved
         if [ "$5" = "apfpv" ]; then
             /etc/init.d/S98adaptive-link stop
             /etc/init.d/S98wifibroadcast stop
@@ -800,6 +807,13 @@ case "$@" in
             rmmod 88XXau_wfb
             modprobe 8812eu
             modprobe 88XXau_wfb
+            if [ -z "$6" ] && [ -f $SAVED/wpa_supplicant.apfpv.conf ]; then
+                cp -a $SAVED/wpa_supplicant.apfpv.conf /etc/wpa_supplicant.apfpv.conf
+                for f in $SAVED/wlx*; do [ -f "$f" ] && cp -a "$f" /etc/network/interfaces.d/; done
+                for f in /etc/network/interfaces.d/wlx*; do
+                    [ -f "$f" ] && grep -q '^auto' "$f" && ifup "$(basename "$f")"
+                done
+            else
             cat <<EOF > /etc/wpa_supplicant.apfpv.conf
 network={
     ssid="$SSID"
@@ -820,10 +834,16 @@ EOF
             [ $INDEX -eq 0 ] && ifup $IFACE
             INDEX=$((INDEX + 1))
             done
+            fi
         elif [ "$5" = "wfb" ]; then
             WIFI_IFACES=$(ip -o link show | awk -F': ' '{print $2}' | grep -E '^wlx' | grep -v "^$EXCLUDE_IFACE$")
+            if [ -f /etc/wpa_supplicant.apfpv.conf ]; then
+                mkdir -p $SAVED && rm -f $SAVED/wlx*
+                cp -a /etc/wpa_supplicant.apfpv.conf $SAVED/
+            fi
             INDEX=0
             for IFACE in $WIFI_IFACES; do
+                [ -d $SAVED ] && [ -f /etc/network/interfaces.d/$IFACE ] && cp -a /etc/network/interfaces.d/$IFACE $SAVED/
                 ifdown $IFACE
                 rm /etc/network/interfaces.d/$IFACE
             done

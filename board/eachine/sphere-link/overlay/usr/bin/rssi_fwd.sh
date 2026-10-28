@@ -30,6 +30,13 @@ loss_field() {
 	printf ',loss=%s' "$(cat $LOSS)"
 }
 
+# WFB (rx_mode wfb): the driver's rssi_a/b do not follow the video, and the
+# camera runs no aalink - the HUD gets wfb-server's per-antenna RSSI on the
+# same % scale instead (wfb_rssi_fwd.py). link_glue.sh restarts this script
+# when the mode changes.
+. /etc/default/wifibroadcast 2>/dev/null
+[ "$WIFIBROADCAST_ENABLED" = true ] && exec python3 /usr/bin/wfb_rssi_fwd.py
+
 while true; do
 	L=$(grep 'rssi_a' "$D/trx_info_debug" 2>/dev/null | head -n1)
 	A=$(echo "$L" | grep -o 'rssi_a *= *[0-9]*' | grep -o '[0-9][0-9]*' | head -n1)

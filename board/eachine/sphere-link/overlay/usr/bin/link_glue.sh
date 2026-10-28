@@ -29,4 +29,11 @@ if ps w | grep -v grep | grep -q cam_proxy.sh; then
 	killf cam_proxy.sh      # its socats go with its next start (killf bind=)
 	setsid /usr/bin/cam_proxy.sh > /dev/null 2>&1 < /dev/null &
 fi
+# the PC HUD's RSSI source follows the mode too (driver in APFPV, wfb-server
+# in WFB): rssi_fwd.sh decides at start. "rssi_fwd" matches both the shell
+# script and wfb_rssi_fwd.py, which it becomes in WFB.
+if ps w | grep -v grep | grep -q rssi_fwd; then
+	killf rssi_fwd; killf "UDP-RECV:12347"
+	setsid /usr/bin/rssi_fwd.sh > /dev/null 2>&1 < /dev/null &
+fi
 echo "link_glue: $([ "$WIFIBROADCAST_ENABLED" = true ] && echo wfb || echo apfpv)"

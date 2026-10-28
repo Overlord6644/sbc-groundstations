@@ -28,9 +28,13 @@ CAM=192.168.0.1
 killf "LISTEN:8081,bind=$GS"
 killf "LISTEN:12355,bind=$GS"
 killf "UDP-LISTEN:11223,bind=$GS"
+killf "LISTEN:12356,bind=$GS"
 
 socat TCP-LISTEN:8081,bind=$GS,reuseaddr,fork TCP:$CAM:80 &
 socat TCP-LISTEN:12355,bind=$GS,reuseaddr,fork TCP:$CAM:12355 &
 # one child per PC socket; -T reaps a child once its peer goes quiet
 socat -T 60 UDP-LISTEN:11223,bind=$GS,reuseaddr,fork UDP:$CAM:11223 &
+# pcpilot's menu into this VRX's gsmenu.sh: rx_mode and the WFB-NG page
+# (gs_remote.sh keeps to that list)
+socat TCP-LISTEN:12356,bind=$GS,reuseaddr,fork EXEC:/usr/bin/gs_remote.sh &
 wait
