@@ -836,6 +836,8 @@ EOF
             /etc/init.d/S98adaptive-link start
             /etc/init.d/S98wifibroadcast start
         fi
+        # camera proxy and keyframe relay follow the camera's new address
+        [ -x /usr/bin/link_glue.sh ] && /usr/bin/link_glue.sh > /dev/null 2>&1
         ;;
     "set gs system gs_rendering"*)
         if [ "$5" = "off" ]; then

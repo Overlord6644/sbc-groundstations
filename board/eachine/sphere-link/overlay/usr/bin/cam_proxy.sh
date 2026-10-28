@@ -18,9 +18,16 @@ killf() {
 }
 
 GS=192.168.5.1
+# the camera: its AP address in APFPV, the far end of the wfb-ng tunnel in WFB
+# (rx_mode wfb). link_glue.sh restarts this script when the mode changes.
 CAM=192.168.0.1
+. /etc/default/wifibroadcast 2>/dev/null
+[ "$WIFIBROADCAST_ENABLED" = true ] && CAM=10.5.0.10
 
-killf "bind=$GS"
+# only this script's own listeners: rssi_fwd.sh has one on $GS too (12347)
+killf "LISTEN:8081,bind=$GS"
+killf "LISTEN:12355,bind=$GS"
+killf "UDP-LISTEN:11223,bind=$GS"
 
 socat TCP-LISTEN:8081,bind=$GS,reuseaddr,fork TCP:$CAM:80 &
 socat TCP-LISTEN:12355,bind=$GS,reuseaddr,fork TCP:$CAM:12355 &
