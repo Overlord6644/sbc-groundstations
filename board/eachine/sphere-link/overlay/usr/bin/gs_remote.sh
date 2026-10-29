@@ -3,16 +3,14 @@
 # ground and WFB-NG pages are the very ones the goggles use. Served by
 # cam_proxy.sh on TCP 192.168.5.1:12356 (gadget mode only). One request line:
 #   <get|set|button> <type> <page> <param> [value...]
-# Allowed: every ground page (system, DVR, APFPV, WiFi, actions... - the VRX's
-# own settings, which the PC menu answered Unknown before) and the air wfbng
-# page. Arguments are passed as words, never evaluated.
+# Allowed: every ground page (the VRX's own settings) and every air page (the
+# camera, as the goggles reach it: gsmenu.sh's cached config and its ssh to
+# the camera) - the PC's own HTTP client did not know the waybeam camera and
+# answered Unknown for most of them. Only get/set/button; arguments are
+# passed as words, never evaluated.
 read -r op type page param rest
 case "$op" in get|set|button) ;; *) echo Unknown; exit 0 ;; esac
-case "$type $page" in
-	"gs "*) ;;
-	"air wfbng") ;;
-	*) echo Unknown; exit 0 ;;
-esac
+case "$type" in gs|air) ;; *) echo Unknown; exit 0 ;; esac
 # the camera where it is now, as the goggles' menu exports it
 . /etc/default/wifibroadcast 2>/dev/null
 [ "$WIFIBROADCAST_ENABLED" = true ] && REMOTE_IP=10.5.0.10 || REMOTE_IP=192.168.0.1
