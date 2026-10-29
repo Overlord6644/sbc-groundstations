@@ -2,13 +2,15 @@
 # gs_remote.sh - pcpilot's menu reaches this VRX's gsmenu.sh here, so its
 # ground and WFB-NG pages are the very ones the goggles use. Served by
 # cam_proxy.sh on TCP 192.168.5.1:12356 (gadget mode only). One request line:
-#   <get|set> <type> <page> <param> [value...]
-# Allowed: gs system rx_mode, and the air wfbng page; anything else answers
-# Unknown. Arguments are passed as words, never evaluated.
+#   <get|set|button> <type> <page> <param> [value...]
+# Allowed: every ground page (system, DVR, APFPV, WiFi, actions... - the VRX's
+# own settings, which the PC menu answered Unknown before) and the air wfbng
+# page. Arguments are passed as words, never evaluated.
 read -r op type page param rest
-case "$op $type $page $param" in
-	"get gs system rx_mode"|"set gs system rx_mode") ;;
-	"get air wfbng "*|"set air wfbng "*) ;;
+case "$op" in get|set|button) ;; *) echo Unknown; exit 0 ;; esac
+case "$type $page" in
+	"gs "*) ;;
+	"air wfbng") ;;
 	*) echo Unknown; exit 0 ;;
 esac
 # the camera where it is now, as the goggles' menu exports it
