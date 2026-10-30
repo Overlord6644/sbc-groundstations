@@ -49,6 +49,8 @@ if [ -d /sys/kernel/config/usb_gadget/g1 ]; then
 	cd ..
 	rmdir -v g1
 	modprobe -r libcomposite > /dev/null 2>&1
+	# no PC any more: the WFB video back to PixelPilot, the map back on
+	/usr/bin/video_route.sh
 	echo ">>> gadget torn down"
 	exit 0
 fi
@@ -113,4 +115,6 @@ setsid /usr/bin/rssi_fwd.sh >/dev/null 2>&1 &
 # map packs pcpilot fills from the web, copied for the goggles' map
 killf map_sync.sh
 setsid /usr/bin/map_sync.sh >/dev/null 2>&1 &
+# in WFB the video goes straight to the PC now (video_route.sh)
+/usr/bin/video_route.sh
 echo ">>> gadget up (mass-storage + net + camera proxy + rssi relay)"

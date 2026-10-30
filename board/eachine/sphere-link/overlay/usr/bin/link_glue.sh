@@ -36,4 +36,6 @@ if ps w | grep -v grep | grep -q rssi_fwd; then
 	killf rssi_fwd; killf "UDP-RECV:12347"
 	setsid /usr/bin/rssi_fwd.sh > /dev/null 2>&1 < /dev/null &
 fi
+# where the WFB video goes: straight to the PC while it is on the gadget
+/usr/bin/video_route.sh
 echo "link_glue: $([ "$WIFIBROADCAST_ENABLED" = true ] && echo wfb || echo apfpv)"
