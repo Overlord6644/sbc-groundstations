@@ -792,8 +792,13 @@ case "$@" in
         SSID="${6:-OpenIPC}"
         PASSWORD="${7:-12345678}"
         # a dual-link camera (wyvern-ai-osd firmware/dual) switches with us:
-        # told first, while it is still reachable at its current address
-        [ -x /usr/bin/cam_linkmode.sh ] && /usr/bin/cam_linkmode.sh "$5"
+        # told first, while it is still reachable at its current address -
+        # and if it answers but does not take it, we stay too: switching
+        # alone leaves the two in different modes, with no link to fix it
+        if [ -x /usr/bin/cam_linkmode.sh ] && ! /usr/bin/cam_linkmode.sh "$5"; then
+            echo "rx_mode: the camera did not switch, staying as we are"
+            exit 1
+        fi
         # the APFPV client config as it was, kept on the way to WFB and put
         # back on the way out - not regenerated from defaults (unless the
         # menu passes an SSID)
