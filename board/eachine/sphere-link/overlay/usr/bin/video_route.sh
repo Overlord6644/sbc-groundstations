@@ -1,14 +1,13 @@
 #!/bin/sh
-# video_route.sh - where the WFB video goes, and what the VRX does with it.
+# video_route.sh - where the WFB video goes: always to PixelPilot on
+# 127.0.0.1, which decodes it for HDMI and restreams it to the PC (as in
+# APFPV).
 #
-# In WFB with the PC on the USB gadget, wfb_rx sends the stream straight to
-# the PC (192.168.5.100:5600, what pcpilot listens on), and the VRX's own
-# display work stops: PixelPilot gets no stream to decode, the ground msposd
-# (the goggles' moving map) is paused. Measured 2026-10-30 at 1 m: through
-# PixelPilot's restream the VRX missed ~115 frames per 20 s for good (its
-# USB radio starved while PixelPilot decoded and msposd drew), straight to
-# the PC 3-6 - the same radio, the same air. In APFPV, or WFB without a PC
-# (goggles alone), everything as before: wfb_rx to PixelPilot on 127.0.0.1.
+# It used to send it straight to the PC while the gadget was up (2026-10-30),
+# measured to lose less. That measurement was taken with 3894 B packets,
+# which the USB link (MTU 1500) splits in three: the PC path tore, the
+# PixelPilot path on HDMI was clean (2026-10-31). The direct path is off;
+# PC_DIRECT=1 in /etc/default/video_route brings it back.
 #
 # Run by link_glue.sh (boot, every rx_mode change) and by gadget (link up
 # and down). wfb-server is restarted only when the destination changes.
@@ -16,7 +15,8 @@ CFG=/etc/wifibroadcast.cfg
 PC=192.168.5.100
 
 . /etc/default/wifibroadcast 2>/dev/null
-if [ "$WIFIBROADCAST_ENABLED" = true ] && [ -d /sys/kernel/config/usb_gadget/g1 ]; then
+. /etc/default/video_route 2>/dev/null
+if [ "$PC_DIRECT" = 1 ] && [ "$WIFIBROADCAST_ENABLED" = true ] && [ -d /sys/kernel/config/usb_gadget/g1 ]; then
 	dest=$PC
 else
 	dest=127.0.0.1

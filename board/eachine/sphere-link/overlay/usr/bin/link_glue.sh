@@ -36,6 +36,30 @@ if ps w | grep -v grep | grep -q rssi_fwd; then
 	killf rssi_fwd; killf "UDP-RECV:12347"
 	setsid /usr/bin/rssi_fwd.sh > /dev/null 2>&1 < /dev/null &
 fi
+# PixelPilot's link-warning glow: one widget per mode, and only this mode's
+# on. The APFPV one reads the station RSSI, which reads 0 in WFB (no station):
+# left on, it lit the whole frame red at LQ 100 %. "---" disables a widget.
+OSDJ=/etc/pixelpilot/osd.json
+if [ -f $OSDJ ]; then
+	[ "$WIFIBROADCAST_ENABLED" = true ] && off=SignalWarning on=SignalWarningWfb \
+		|| { off=SignalWarningWfb; on=SignalWarning; }
+	awk -v off="$off" -v on="$on" '
+		/"name": *"/ { n = $0; sub(/.*"name": *"/, "", n); sub(/".*/, "", n) }
+		/"type": *"(---)?SignalWarningWidget"/ {
+			if (n == off) sub(/"(---)?SignalWarningWidget"/, "\"---SignalWarningWidget\"")
+			if (n == on)  sub(/"(---)?SignalWarningWidget"/, "\"SignalWarningWidget\"")
+		}
+		{ print }' $OSDJ > /tmp/osd.json.new
+	if ! cmp -s $OSDJ /tmp/osd.json.new; then
+		cat /tmp/osd.json.new > $OSDJ; sync
+		# SIGTERM ends pixelpilot.sh's loop too (rc 143): start it again
+		if killall -q pixelpilot; then
+			sleep 1
+			setsid /etc/init.d/S99pixelpilot start < /dev/null > /dev/null 2>&1
+		fi
+	fi
+	rm -f /tmp/osd.json.new
+fi
 # where the WFB video goes: straight to the PC while it is on the gadget
 /usr/bin/video_route.sh
 echo "link_glue: $([ "$WIFIBROADCAST_ENABLED" = true ] && echo wfb || echo apfpv)"
