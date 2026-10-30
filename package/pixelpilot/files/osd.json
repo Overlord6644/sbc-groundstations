@@ -329,14 +329,14 @@
             ]
         },
         {
-            "__comment": "The WFB twin of SignalWarning: the same glow from wfb-server's per-antenna RSSI (dBm). -55 / -78 are SignalWarning's 45 % / 22 % on the scale the PC HUD gets in WFB (% = dBm + 100, wfb_rssi_fwd.py), so the goggles and pcpilot light up together in both modes. Each widget only has facts in its own mode; with none it stays hidden.",
+            "__comment": "The WFB twin of SignalWarning: the same glow from wfb-server's per-antenna RSSI (dBm). -75 / -86 are pcpilot's halo limits (RSSI_GOOD 25 % / RSSI_BAD 14 %, % = dBm + 100 in WFB, wfb_rssi_fwd.py), so the goggles and pcpilot light up together. It was -55 / -78: lit at -60 dBm, a strong MCS4 signal. Each widget only has facts in its own mode; with none it stays hidden.",
             "name": "SignalWarningWfb",
             "type": "SignalWarningWidget",
             "x": 0,
             "y": 0,
             "average_ms": 1000,
-            "threshold": -55,
-            "critical": -78,
+            "threshold": -75,
+            "critical": -86,
             "facts": [
                 {
                     "name": "wfbcli.rx.ant_stats.rssi_avg",
